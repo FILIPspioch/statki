@@ -22,18 +22,18 @@ public:
 class pionek
 {
 public:
-	size_t posY;
-	size_t posX;
+	int posY;
+	int posX;
 
 	enum class stan
 	{
-		zatopiony,
+		zatopiony = 1,
 		caly,
 	};
 
 	stan stanPionka;
 public:
-	pionek(size_t posX, size_t posY, stan stanP)
+	pionek(int posX, int posY, stan stanP)
 	{
 		this->posX = posX;
 		this->posY = posY;
