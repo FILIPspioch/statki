@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include<iostream>
+#include <utility>
 
 
 class board
@@ -31,9 +32,6 @@ public:
 		caly
 	};
 
-
-	
-
 	stan stanPionka;
 public:
 	pionek(int posX, int posY, stan stanP)
@@ -52,7 +50,7 @@ class bot
 public:
 	auto random_pos();
 	void bot_play();
-	bool make_guess(int* coord);
+	int make_guess(std::pair<int, int>& pozycja);
 };
 
 class game

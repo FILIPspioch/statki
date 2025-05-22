@@ -4,13 +4,22 @@
 #include <iostream>
 #include <string>
 #include <cctype>
-#include <ctime>
 #include <cstdlib>
+
+//losowanie
+#include <functional>
+#include <random>
+
+//pair
+#include <utility>
+
+
 using namespace std;
 
 HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
 int convertToNumber(char letter);
+auto rand_c = bind(uniform_int_distribution<int>{0, 9}, default_random_engine{});
 
 vector<COORD> positions;
 
@@ -104,13 +113,15 @@ void pionek::drawPionek(int PosY, int PosX)
 	SetConsoleCursorPosition(h, pozycja);
 	cout << setw(3)<< "#";
 	
-	positions.push_back(pozycja);
+	COORD pozycje_w = {PosX, PosY };
+	positions.push_back(pozycje_w);
 
 	
 	COORD inpPos;
 	inpPos.X = 2;
 	inpPos.Y = 2;
 	SetConsoleCursorPosition(h, inpPos);
+	
 
 }
 
@@ -120,11 +131,15 @@ void player::wybor_pola()
 	pos.X = 0;
 	pos.Y = 0;
 	SetConsoleCursorPosition(h, pos);
-	cout << "Podaj pole: (X:Y)";
+	string message = "Podaj pole: (X:Y)";
+	cout << message;
+	
+	cout << "    ";
+	SetConsoleCursorPosition(h, {(short)(pos.X + message.length()), pos.Y});
 
 	string pole;
 	cin >> pole;
-	int PosY = stoi(pole.substr(pole.length()-1));
+	int PosY = stoi(pole.substr( pole.find_first_of(':')+1, string::npos));
 	char PosX_s = pole[0];
 	int PosX = 0;
 	if (convertToNumber(PosX_s) != -1)
@@ -148,51 +163,42 @@ int convertToNumber(char letter)
 }
 
 auto bot::random_pos()
-{
-	srand(time(0));
-	
-	int posY = (rand() % 11);
-	int posX = (rand() % 11);	
-	int pos[2] = {posX, posY};
+{	
+	int posY = rand_c();
+	int posX = rand_c();	 
 
-	return pos;
+	return pair<int, int>{posX, posY};
 }
 
 void bot::bot_play()
 {
 	bot botO;
-	auto pos = botO.random_pos();
-	auto posX = pos[0];
-	auto posY = pos[1];
-	COORD position = { posX, posY };
 
-	if (botO.make_guess(pos)) {
-		SetConsoleCursorPosition(h, position);
+	auto pos = botO.random_pos();
+	if (botO.make_guess(pos) != -1) {
+		SetConsoleCursorPosition(h, { positions[botO.make_guess(pos)].X, positions[botO.make_guess(pos)].Y});
 		SetConsoleTextAttribute(h, BACKGROUND_RED);
-		SetConsoleCursorPosition(h, { 2 , 3 });
-		cout << "Statek zostal zbity! " << endl;
+		SetConsoleCursorPosition(h, { 2 , 25 });
+		cout << "Statek zostal zbity! " << pos.first << " ; " << pos.second << endl;
 	}
 	else
 	{
-		cout << "Bot nie trafil [" << posX << " ; " << posY << " ]" << endl;
+		//cout << "Bot nie trafil [" << pos.first << " ; " << pos.second << " ]" << endl;
 	}
-
-	
-
 }
 
-bool bot::make_guess(int* coord)
+int bot::make_guess(pair<int, int>& pozycja)
 {
-	auto pos = coord;
-	auto posX = coord[0];
-	auto posY = coord[1];
+	auto posX = pozycja.first;
+	auto posY = pozycja.second;
 	
-	for (auto a : positions)
+	for (int i{0}; i< 10; i++)
 	{
-		if (a.Y == posY && a.X == posX)
+		if (positions[i].Y == posY && positions[i].X == posX)
 		{
-			return true;
-		}
+			return i;
+		}	
 	}
-	return false;
+	return -1;
+	
 }

@@ -22,8 +22,9 @@ void gra()
 
 	do
 	{	
-		cout << "Pozostało pionkow: " << gracz.liczba_pionkow << endl;
+		
 		gracz.wybor_pola();
+		cout << "Pozostało pionkow: " << gracz.liczba_pionkow << " " << endl;
 		gracz.liczba_pionkow--;
 		if (gracz.liczba_pionkow == 0)
 		{
@@ -32,7 +33,7 @@ void gra()
 		}
 	} while (true);
 
-	for (int i{ 0 }; i < 10; i++)
+	for (int i{ 0 }; i < 100; i++)
 	{
 		Gracz_Bot.bot_play();
 	}
