@@ -4,11 +4,16 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <ctime>
+#include <cstdlib>
 using namespace std;
 
 HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
 int convertToNumber(char letter);
+
+vector<COORD> positions;
+
 
 void game::render()
 {
@@ -98,7 +103,10 @@ void pionek::drawPionek(int PosY, int PosX)
 	pozycja.Y = PosY + 5;
 	SetConsoleCursorPosition(h, pozycja);
 	cout << setw(3)<< "#";
+	
+	positions.push_back(pozycja);
 
+	
 	COORD inpPos;
 	inpPos.X = 2;
 	inpPos.Y = 2;
@@ -112,32 +120,79 @@ void player::wybor_pola()
 	pos.X = 0;
 	pos.Y = 0;
 	SetConsoleCursorPosition(h, pos);
-	string message = "Podaj pole: (X:Y)";
-	cout << message;
+	cout << "Podaj pole: (X:Y)";
 
 	string pole;
 	cin >> pole;
 	int PosY = stoi(pole.substr(pole.length()-1));
 	char PosX_s = pole[0];
-	int PosX = convertToNumber(PosX_s);
+	int PosX = 0;
+	if (convertToNumber(PosX_s) != -1)
+	{
+		PosX = convertToNumber(PosX_s);
+	}
+	else
+	{
+		cout << "Blednia podana liczba" << endl;
+		return;
+	}
 
 	pionek postac(PosX, PosY, pionek::stan::caly);
 	postac.drawPionek(PosY, PosX);
-	
 }
 
 int convertToNumber(char letter)
 {
-	string alphabet{ "ABCDEFGHIJ" };
-	for (int i{ 0 }; i < alphabet.length(); i++)
-	{
-
-		if ( toupper(letter) == alphabet[i])
-		{
-			return i+1;
-		}
-		
-	}
-	cout << "Bledna litera" << endl;
+	const char iChar = toupper(letter);
+	return((iChar >= 'A' && iChar <= 'J') ? iChar - 64 : -1);
 }
 
+auto bot::random_pos()
+{
+	srand(time(0));
+	
+	int posY = (rand() % 11);
+	int posX = (rand() % 11);	
+	int pos[2] = {posX, posY};
+
+	return pos;
+}
+
+void bot::bot_play()
+{
+	bot botO;
+	auto pos = botO.random_pos();
+	auto posX = pos[0];
+	auto posY = pos[1];
+	COORD position = { posX, posY };
+
+	if (botO.make_guess(pos)) {
+		SetConsoleCursorPosition(h, position);
+		SetConsoleTextAttribute(h, BACKGROUND_RED);
+		SetConsoleCursorPosition(h, { 2 , 3 });
+		cout << "Statek zostal zbity! " << endl;
+	}
+	else
+	{
+		cout << "Bot nie trafil [" << posX << " ; " << posY << " ]" << endl;
+	}
+
+	
+
+}
+
+bool bot::make_guess(int* coord)
+{
+	auto pos = coord;
+	auto posX = coord[0];
+	auto posY = coord[1];
+	
+	for (auto a : positions)
+	{
+		if (a.Y == posY && a.X == posX)
+		{
+			return true;
+		}
+	}
+	return false;
+}

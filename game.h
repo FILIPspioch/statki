@@ -28,8 +28,11 @@ public:
 	enum class stan
 	{
 		zatopiony = 1,
-		caly,
+		caly
 	};
+
+
+	
 
 	stan stanPionka;
 public:
@@ -41,6 +44,15 @@ public:
 	}
 
 	void drawPionek(int PosY, int PosX);
+
+};
+
+class bot
+{
+public:
+	auto random_pos();
+	void bot_play();
+	bool make_guess(int* coord);
 };
 
 class game
