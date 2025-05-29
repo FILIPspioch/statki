@@ -5,6 +5,9 @@
 #include <string>
 #include <cctype>
 #include <cstdlib>
+#include <regex>
+#include <thread>
+#include<chrono>
 
 //losowanie
 #include <functional>
@@ -12,6 +15,7 @@
 
 //pair
 #include <utility>
+
 
 
 using namespace std;
@@ -22,6 +26,9 @@ int convertToNumber(char letter);
 auto rand_c = bind(uniform_int_distribution<int>{0, 9}, default_random_engine{});
 
 vector<COORD> positions;
+
+WORD default_console;
+CONSOLE_SCREEN_BUFFER_INFO info;
 
 
 void game::render()
@@ -64,6 +71,12 @@ void board::render()
 		}
 		cout << '\n';
 	}
+
+
+	SetConsoleCursorPosition(h, { 0, 20 });
+	cout << "Nacisnij ESC aby wyjsc" << endl;
+	cout << "Nacisnij L aby wyswietlic loga bota" << endl;
+	SetConsoleCursorPosition(h, { 0,0 });
 
 
 }
@@ -127,6 +140,7 @@ void pionek::drawPionek(int PosY, int PosX)
 
 void player::wybor_pola()
 {
+	GetConsoleScreenBufferInfo(h, &info);
 	COORD pos;
 	pos.X = 0;
 	pos.Y = 0;
@@ -139,21 +153,41 @@ void player::wybor_pola()
 
 	string pole;
 	cin >> pole;
-	int PosY = stoi(pole.substr( pole.find_first_of(':')+1, string::npos));
-	char PosX_s = pole[0];
-	int PosX = 0;
-	if (convertToNumber(PosX_s) != -1)
+
+	regex wzor("[a-jA-J]:[[:d:]]");
+	smatch wynik;
+	if (regex_search(pole, wynik, wzor))
 	{
-		PosX = convertToNumber(PosX_s);
+		int PosY = stoi(pole.substr(pole.find_first_of(':') + 1, string::npos));
+		char PosX_s = pole[0];
+		int PosX = 0;
+		if (convertToNumber(PosX_s) != -1)
+		{
+			PosX = convertToNumber(PosX_s);
+		}
+		else
+		{
+			cout << "Blednia podana liczba" << endl;
+			return;
+		}
+
+		pionek postac(PosX, PosY, pionek::stan::caly);
+		postac.drawPionek(PosY, PosX);
 	}
 	else
 	{
-		cout << "Blednia podana liczba" << endl;
-		return;
+		pos.X = 0;
+		pos.Y = 0;
+		SetConsoleCursorPosition(h, pos);
+		cout << "Zle wprowadzona pozycja! Wpisz jeszcze raz" << endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		SetConsoleCursorPosition(h, { 0,0 });
+		cout <<setw(100) << " ";
+		player::wybor_pola();
 	}
 
-	pionek postac(PosX, PosY, pionek::stan::caly);
-	postac.drawPionek(PosY, PosX);
+
+	
 }
 
 int convertToNumber(char letter)
@@ -180,10 +214,19 @@ void bot::bot_play()
 		SetConsoleTextAttribute(h, BACKGROUND_RED);
 		SetConsoleCursorPosition(h, { 2 , 25 });
 		cout << "Statek zostal zbity! " << pos.first << " ; " << pos.second << endl;
+		if (bot::displayLog)
+		{
+			bot::log(pos.first, pos.second);
+		}
+
+		SetConsoleTextAttribute(h, default_console);
 	}
 	else
 	{
-		//cout << "Bot nie trafil [" << pos.first << " ; " << pos.second << " ]" << endl;
+		if(bot::displayLog)
+		{
+		bot::log(pos.first, pos.second);
+		}
 	}
 }
 
@@ -201,4 +244,50 @@ int bot::make_guess(pair<int, int>& pozycja)
 	}
 	return -1;
 	
+}
+
+void bot::log(int x, int y)
+{
+
+	default_console = info.wAttributes;
+
+	COORD m_pos;
+	m_pos.X = 5;
+	m_pos.Y = 30;
+	SetConsoleTextAttribute(h, BACKGROUND_GREEN);
+
+	cout << "|";
+	for (int i{ 0 }; i < 10; i++)
+	{
+		if (i != 5)
+		{
+			cout << "-";
+		}
+		else
+		{
+			cout << "Bot Log";
+		}
+	}
+
+	cout << "|" << endl;
+
+	cout << "Bot wybral: x = " << x << "; y = " << y << endl;
+
+	cout << "|";
+	for (int i{ 0 }; i < 10; i++)
+	{
+		if (i != 5)
+		{
+			cout << "-";
+		}
+		else
+		{
+			cout << "Koniec loga";
+		}
+	}
+
+	cout << "|" << endl;
+
+
+	SetConsoleTextAttribute(h, default_console);
 }

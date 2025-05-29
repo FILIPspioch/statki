@@ -13,7 +13,7 @@ int main()
 }
 
 void gra()
-{
+{	
 	game gra;
 	player gracz;
 	gra.render();

@@ -51,6 +51,8 @@ public:
 	auto random_pos();
 	void bot_play();
 	int make_guess(std::pair<int, int>& pozycja);
+	void log(int x, int y );
+	bool displayLog = false;
 };
 
 class game
