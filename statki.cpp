@@ -1,10 +1,10 @@
 ﻿#include <iostream>
 #include "game.h"
+#include <stdlib.h>
 
 using namespace std;
 
 void gra();
-
 
 int main()
 {
@@ -22,7 +22,6 @@ void gra()
 
 	do
 	{	
-		
 		gracz.wybor_pola();
 		gracz.liczba_pionkow--;
 		cout << "Pozostało pionkow: " << gracz.liczba_pionkow << " " << endl;
@@ -39,4 +38,6 @@ void gra()
 		Gracz_Bot.bot_play();
 	}
 
+	
+	
 }

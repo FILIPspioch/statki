@@ -9,6 +9,7 @@
 #include <thread>
 #include<chrono>
 
+
 //losowanie
 #include <functional>
 #include <random>
@@ -23,6 +24,7 @@ using namespace std;
 HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
 int convertToNumber(char letter);
+char convertToLetter(int number);
 auto rand_c = bind(uniform_int_distribution<int>{0, 9}, default_random_engine{});
 
 vector<COORD> positions;
@@ -71,14 +73,6 @@ void board::render()
 		}
 		cout << '\n';
 	}
-
-
-	SetConsoleCursorPosition(h, { 0, 20 });
-	cout << "Nacisnij ESC aby wyjsc" << endl;
-	cout << "Nacisnij L aby wyswietlic loga bota" << endl;
-	SetConsoleCursorPosition(h, { 0,0 });
-
-
 }
 
 void pionek::drawPionek(int PosY, int PosX)
@@ -154,9 +148,9 @@ void player::wybor_pola()
 	string pole;
 	cin >> pole;
 
-	regex wzor("[a-jA-J]:[[:d:]]");
+	regex wzor("[a-jA-J]:(10|[1-9])");
 	smatch wynik;
-	if (regex_search(pole, wynik, wzor))
+	if (regex_match(pole, wynik, wzor))
 	{
 		int PosY = stoi(pole.substr(pole.find_first_of(':') + 1, string::npos));
 		char PosX_s = pole[0];
@@ -185,15 +179,18 @@ void player::wybor_pola()
 		cout <<setw(100) << " ";
 		player::wybor_pola();
 	}
-
-
-	
 }
 
 int convertToNumber(char letter)
 {
 	const char iChar = toupper(letter);
 	return((iChar >= 'A' && iChar <= 'J') ? iChar - 64 : -1);
+}
+
+char convertToLetter(int number)
+{
+	const int liczba = number;
+	return ((liczba >= 1 && liczba <= 10) ? liczba + 64 : -1);
 }
 
 auto bot::random_pos()
@@ -208,14 +205,20 @@ void bot::bot_play()
 {
 	bot botO;
 
+
+	COORD m_pos;
+	m_pos.X = 5;
+	m_pos.Y = 30;
+
 	auto pos = botO.random_pos();
 	if (botO.make_guess(pos) != -1) {
 		SetConsoleCursorPosition(h, { positions[botO.make_guess(pos)].X, positions[botO.make_guess(pos)].Y});
 		SetConsoleTextAttribute(h, BACKGROUND_RED);
 		SetConsoleCursorPosition(h, { 2 , 25 });
-		cout << "Statek zostal zbity! " << pos.first << " ; " << pos.second << endl;
+		cout << "Statek zostal zbity! " << convertToLetter(pos.first) << " ; " << pos.second << endl;
 		if (bot::displayLog)
 		{
+
 			bot::log(pos.first, pos.second);
 		}
 
@@ -223,8 +226,11 @@ void bot::bot_play()
 	}
 	else
 	{
+
 		if(bot::displayLog)
 		{
+
+			
 		bot::log(pos.first, pos.second);
 		}
 	}
@@ -251,9 +257,7 @@ void bot::log(int x, int y)
 
 	default_console = info.wAttributes;
 
-	COORD m_pos;
-	m_pos.X = 5;
-	m_pos.Y = 30;
+	
 	SetConsoleTextAttribute(h, BACKGROUND_GREEN);
 
 	cout << "|";
@@ -271,7 +275,7 @@ void bot::log(int x, int y)
 
 	cout << "|" << endl;
 
-	cout << "Bot wybral: x = " << x << "; y = " << y << endl;
+	cout << "Bot wybral: x = " << convertToLetter(x) << "; y = " << y << endl;
 
 	cout << "|";
 	for (int i{ 0 }; i < 10; i++)
