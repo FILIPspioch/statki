@@ -24,8 +24,9 @@ void gra()
 	{	
 		
 		gracz.wybor_pola();
-		cout << "Pozostało pionkow: " << gracz.liczba_pionkow << " " << endl;
 		gracz.liczba_pionkow--;
+		cout << "Pozostało pionkow: " << gracz.liczba_pionkow << " " << endl;
+		
 		if (gracz.liczba_pionkow == 0)
 		{
 			cout << "Brak pionkow. Koniec etapu rozstawiania!" << endl;
